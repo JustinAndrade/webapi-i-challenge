@@ -7,14 +7,11 @@ const server = express();
 server.use(express.json());
 
 // POST to /api/users
-server.post('/users', (req, res, err) => {
+server.post('/users', (req, res) => {
 	const newUser = req.body;
-	if (newUser === !req.body) {
-		return 'Please provide name and bio for the user.';
-	}
 
-	users
-		.add(mewUser)
+	db
+		.insert(newUser)
 		.then((addedUser) => {
 			res.status(201).json(addedUser);
 		})
@@ -37,12 +34,12 @@ server.get('/users', (req, res) => {
 
 // GET to /api/users/:id
 server.get('/users/:id', (req, res) => {
-	const { id } = req.param;
+	const { id } = req.params;
 
-	users
-		.add(id)
-		.then((addedUser) => {
-			res.json(addedUser);
+	db
+		.findById(id)
+		.then((user) => {
+			res.status(200).json(user);
 		})
 		.catch((err) => {
 			res.status(404).json({ err: 'The user with the specified ID does not exist.' });
@@ -53,7 +50,7 @@ server.get('/users/:id', (req, res) => {
 server.delete('/users/:id', (req, res) => {
 	const { id } = req.params;
 
-	users
+	db
 		.remove(id)
 		.then((removedUser) => {
 			res.json(removedUser);
@@ -65,13 +62,13 @@ server.delete('/users/:id', (req, res) => {
 
 // PUT to /api/users/:id
 server.put('/users/:id', (req, res) => {
-	const { id } = req._destroy.parmams;
-	const changes = req.body;
+	const { id } = req.params;
+	const user = req.body;
 
-	users
-		.update(id, changes)
+	db
+		.update(id, user)
 		.then((updatedUser) => {
-			if (changes) {
+			if (updatedUser) {
 				res.json(updatedUser);
 			} else {
 				res.status(404).json({ err: 'The user with the specified ID does not exist.' });
