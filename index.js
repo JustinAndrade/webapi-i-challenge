@@ -13,10 +13,14 @@ server.post('/users', (req, res) => {
 	db
 		.insert(newUser)
 		.then((addedUser) => {
-			res.status(201).json(addedUser);
+			if (addedUser.name && addedUser.bio) {
+				res.status(201).json(addedUser);
+			} else {
+				res.status(400).json({ err: 'Please provide name and bio for the user.' });
+			}
 		})
 		.catch((err) => {
-			res.status(400).json({ err: 'There was an error while saving the user to the database' });
+			res.status(500).json({ err: 'There was an error while saving the user to the database' });
 		});
 });
 
@@ -28,7 +32,7 @@ server.get('/users', (req, res) => {
 			res.json(users);
 		})
 		.catch((err) => {
-			res.json({ err: 'The users information could not be retrieved.' });
+			res.status(400).json({ err: 'The users information could not be retrieved.' });
 		});
 });
 
@@ -39,10 +43,14 @@ server.get('/users/:id', (req, res) => {
 	db
 		.findById(id)
 		.then((user) => {
-			res.status(200).json(user);
+			if (user) {
+				res.json(user);
+			} else {
+				res.status(404).json({ err: 'The user with the specified ID does not exist.' });
+			}
 		})
 		.catch((err) => {
-			res.status(404).json({ err: 'The user with the specified ID does not exist.' });
+			res.status(500).json({ err: 'The user information could not be retrieved' });
 		});
 });
 
@@ -53,10 +61,14 @@ server.delete('/users/:id', (req, res) => {
 	db
 		.remove(id)
 		.then((removedUser) => {
-			res.json(removedUser);
+			if (removedUser) {
+				res.json(removedUser);
+			} else {
+				res.status(404).json({ err: 'The user with the specified ID does not exist.' });
+			}
 		})
 		.catch((err) => {
-			res.status(404).json({ err: 'The users information could not be retrieved.' });
+			res.status(404).json({ err: 'The user could not be removed.' });
 		});
 });
 
@@ -68,14 +80,16 @@ server.put('/users/:id', (req, res) => {
 	db
 		.update(id, user)
 		.then((updatedUser) => {
-			if (updatedUser) {
-				res.json(updatedUser);
+			if (!user.name && user.bio) {
+				res.status(400).json({ err: 'Please provide name and bio for the user.' });
+			} else if (updatedUser) {
+				res.status(200).json(updatedUser);
 			} else {
 				res.status(404).json({ err: 'The user with the specified ID does not exist.' });
 			}
 		})
 		.catch((err) => {
-			res.status(400).json({ err: 'error' });
+			res.status(404).json({ err: 'Something went wrong!' });
 		});
 });
 
